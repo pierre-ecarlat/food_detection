@@ -1,0 +1,122 @@
+####################################################
+## General
+####################################################
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.cuo
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+
+# Compiled protocol buffers
+*.pb.h
+*.pb.cc
+*_pb2.py
+
+# Compiled python
+*.pyc
+
+# Compiled MATLAB
+*.mex*
+
+# IPython notebook checkpoints
+.ipynb_checkpoints
+
+# Editor temporaries
+*.swp
+*~
+
+# Sublime Text settings
+*.sublime-workspace
+*.sublime-project
+
+# Eclipse Project settings
+*.*project
+.settings
+
+# QtCreator files
+*.user
+
+# PyCharm files
+.idea
+
+# Visual Studio Code files
+.vscode
+
+# OSX dir files
+.DS_Store
+
+
+####################################################
+## Food detector framework
+####################################################
+
+
+
+####################################################
+## Faster RCNN framework
+####################################################
+/py-faster-rcnn/output
+/py-faster-rcnn/data/**
+!/py-faster-rcnn/data/.gitkeep
+!/py-faster-rcnn/data/README.md
+!/py-faster-rcnn/data/pylintrc
+!/py-faster-rcnn/data/demo/
+!/py-faster-rcnn/data/scripts/
+
+
+####################################################
+## Caffe
+####################################################
+
+# User's build configuration
+/py-faster-rcnn/caffe-fast-rcnn/Makefile.config
+
+# Data and models are either
+# 1. reference, and not casually committed
+# 2. custom, and live on their own unless they're deliberated contributed
+/py-faster-rcnn/caffe-fast-rcnn/data/*
+/py-faster-rcnn/caffe-fast-rcnn/models/*
+/py-faster-rcnn/caffe-fast-rcnn/*.caffemodel
+/py-faster-rcnn/caffe-fast-rcnn/*.caffemodel.h5
+/py-faster-rcnn/caffe-fast-rcnn/*.solverstate
+/py-faster-rcnn/caffe-fast-rcnn/*.solverstate.h5
+/py-faster-rcnn/caffe-fast-rcnn/*.binaryproto
+/py-faster-rcnn/caffe-fast-rcnn/*leveldb
+/py-faster-rcnn/caffe-fast-rcnn/*lmdb
+
+# build, distribute, and bins (+ python proto bindings)
+/py-faster-rcnn/caffe-fast-rcnn/build
+/py-faster-rcnn/caffe-fast-rcnn/.build_debug/*
+/py-faster-rcnn/caffe-fast-rcnn/.build_release/*
+/py-faster-rcnn/caffe-fast-rcnn/distribute/*
+/py-faster-rcnn/caffe-fast-rcnn/*.testbin
+/py-faster-rcnn/caffe-fast-rcnn/*.bin
+/py-faster-rcnn/caffe-fast-rcnn/python/caffe/proto/
+/py-faster-rcnn/caffe-fast-rcnn/cmake_build
+/py-faster-rcnn/caffe-fast-rcnn/.cmake_build
+
+# Generated documentation
+/py-faster-rcnn/caffe-fast-rcnn/docs/_site
+/py-faster-rcnn/caffe-fast-rcnn/docs/_includes
+/py-faster-rcnn/caffe-fast-rcnn/docs/gathered
+/py-faster-rcnn/caffe-fast-rcnn/_site
+/py-faster-rcnn/caffe-fast-rcnn/doxygen
+/py-faster-rcnn/caffe-fast-rcnn/docs/dev
+
+# LevelDB files
+/py-faster-rcnn/caffe-fast-rcnn/*.sst
+/py-faster-rcnn/caffe-fast-rcnn/*.ldb
+/py-faster-rcnn/caffe-fast-rcnn/LOCK
+/py-faster-rcnn/caffe-fast-rcnn/LOG*
+/py-faster-rcnn/caffe-fast-rcnn/CURRENT
+/py-faster-rcnn/caffe-fast-rcnn/MANIFEST-*

@@ -1,200 +1,254 @@
 # --------------------------------------------------------
-# Fast/er R-CNN
+# Fast R-CNN
+# Copyright (c) 2015 Microsoft
 # Licensed under The MIT License [see LICENSE for details]
-# Written by Bharath Hariharan
+# Written by Ross Girshick
 # --------------------------------------------------------
 
-import xml.etree.ElementTree as ET
 import os
-import cPickle
+import os.path as osp
+import PIL
+from utils.cython_bbox import bbox_overlaps
 import numpy as np
+import scipy.sparse
+from fast_rcnn.config import cfg
 
-def parse_rec(filename):
-    """ Parse a PASCAL VOC xml file """
-    tree = ET.parse(filename)
-    objects = []
-    for obj in tree.findall('object'):
-        obj_struct = {}
-        obj_struct['name'] = obj.find('name').text
-        obj_struct['pose'] = obj.find('pose').text
-        obj_struct['truncated'] = int(obj.find('truncated').text)
-        obj_struct['difficult'] = int(obj.find('difficult').text)
-        bbox = obj.find('bndbox')
-        obj_struct['bbox'] = [int(bbox.find('xmin').text),
-                              int(bbox.find('ymin').text),
-                              int(bbox.find('xmax').text),
-                              int(bbox.find('ymax').text)]
-        objects.append(obj_struct)
+class imdb(object):
+    """Image database."""
 
-    return objects
+    def __init__(self, name):
+        self._name = name
+        self._num_classes = 0
+        self._classes = []
+        self._image_index = []
+        self._obj_proposer = 'selective_search'
+        self._roidb = None
+        self._roidb_handler = self.default_roidb
+        # Use this dict for storing dataset specific config options
+        self.config = {}
 
-def voc_ap(rec, prec, use_07_metric=False):
-    """ ap = voc_ap(rec, prec, [use_07_metric])
-    Compute VOC AP given precision and recall.
-    If use_07_metric is true, uses the
-    VOC 07 11 point method (default:False).
-    """
-    if use_07_metric:
-        # 11 point metric
-        ap = 0.
-        for t in np.arange(0., 1.1, 0.1):
-            if np.sum(rec >= t) == 0:
-                p = 0
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def num_classes(self):
+        return len(self._classes)
+
+    @property
+    def classes(self):
+        return self._classes
+
+    @property
+    def image_index(self):
+        return self._image_index
+
+    @property
+    def roidb_handler(self):
+        return self._roidb_handler
+
+    @roidb_handler.setter
+    def roidb_handler(self, val):
+        self._roidb_handler = val
+
+    def set_proposal_method(self, method):
+        method = eval('self.' + method + '_roidb')
+        self.roidb_handler = method
+
+    @property
+    def roidb(self):
+        # A roidb is a list of dictionaries, each with the following keys:
+        #   boxes
+        #   gt_overlaps
+        #   gt_classes
+        #   flipped
+        if self._roidb is not None:
+            return self._roidb
+        self._roidb = self.roidb_handler()
+        return self._roidb
+
+    @property
+    def cache_path(self):
+        cache_path = osp.abspath(osp.join(cfg.DATA_DIR, 'cache'))
+        if not os.path.exists(cache_path):
+            os.makedirs(cache_path)
+        return cache_path
+
+    @property
+    def num_images(self):
+      return len(self.image_index)
+
+    def image_path_at(self, i):
+        raise NotImplementedError
+
+    def default_roidb(self):
+        raise NotImplementedError
+
+    def evaluate_detections(self, all_boxes, output_dir=None):
+        """
+        all_boxes is a list of length number-of-classes.
+        Each list element is a list of length number-of-images.
+        Each of those list elements is either an empty list []
+        or a numpy array of detection.
+        all_boxes[class][image] = [] or np.array of shape #dets x 5
+        """
+        raise NotImplementedError
+
+    def _get_widths(self):
+      return [PIL.Image.open(self.image_path_at(i)).size[0]
+              for i in xrange(self.num_images)]
+
+    def append_flipped_images(self):
+        num_images = self.num_images
+        widths = self._get_widths()
+        for i in xrange(num_images):
+            boxes = self.roidb[i]['boxes'].copy()
+            oldx1 = boxes[:, 0].copy()
+            oldx2 = boxes[:, 2].copy()
+            boxes[:, 0] = widths[i] - oldx2 
+            boxes[:, 2] = widths[i] - oldx1 
+            for b in range(len(boxes)):
+                if boxes[b][2] < boxes[b][0]:
+                    boxes[b][0]=0
+            assert (boxes[:, 2] >= boxes[:, 0]).all()
+            entry = {'boxes' : boxes,
+                     'gt_overlaps' : self.roidb[i]['gt_overlaps'],
+                     'gt_classes' : self.roidb[i]['gt_classes'],
+                     'flipped' : True}
+            self.roidb.append(entry)
+        self._image_index = self._image_index * 2
+
+    def evaluate_recall(self, candidate_boxes=None, thresholds=None,
+                        area='all', limit=None):
+        """Evaluate detection proposal recall metrics.
+        Returns:
+            results: dictionary of results with keys
+                'ar': average recall
+                'recalls': vector recalls at each IoU overlap threshold
+                'thresholds': vector of IoU overlap thresholds
+                'gt_overlaps': vector of all ground-truth overlaps
+        """
+        # Record max overlap value for each gt box
+        # Return vector of overlap values
+        areas = { 'all': 0, 'small': 1, 'medium': 2, 'large': 3,
+                  '96-128': 4, '128-256': 5, '256-512': 6, '512-inf': 7}
+        area_ranges = [ [0**2, 1e5**2],    # all
+                        [0**2, 32**2],     # small
+                        [32**2, 96**2],    # medium
+                        [96**2, 1e5**2],   # large
+                        [96**2, 128**2],   # 96-128
+                        [128**2, 256**2],  # 128-256
+                        [256**2, 512**2],  # 256-512
+                        [512**2, 1e5**2],  # 512-inf
+                      ]
+        assert areas.has_key(area), 'unknown area range: {}'.format(area)
+        area_range = area_ranges[areas[area]]
+        gt_overlaps = np.zeros(0)
+        num_pos = 0
+        for i in xrange(self.num_images):
+            # Checking for max_overlaps == 1 avoids including crowd annotations
+            # (...pretty hacking :/)
+            max_gt_overlaps = self.roidb[i]['gt_overlaps'].toarray().max(axis=1)
+            gt_inds = np.where((self.roidb[i]['gt_classes'] > 0) &
+                               (max_gt_overlaps == 1))[0]
+            gt_boxes = self.roidb[i]['boxes'][gt_inds, :]
+            gt_areas = self.roidb[i]['seg_areas'][gt_inds]
+            valid_gt_inds = np.where((gt_areas >= area_range[0]) &
+                                     (gt_areas <= area_range[1]))[0]
+            gt_boxes = gt_boxes[valid_gt_inds, :]
+            num_pos += len(valid_gt_inds)
+
+            if candidate_boxes is None:
+                # If candidate_boxes is not supplied, the default is to use the
+                # non-ground-truth boxes from this roidb
+                non_gt_inds = np.where(self.roidb[i]['gt_classes'] == 0)[0]
+                boxes = self.roidb[i]['boxes'][non_gt_inds, :]
             else:
-                p = np.max(prec[rec >= t])
-            ap = ap + p / 11.
-    else:
-        # correct AP calculation
-        # first append sentinel values at the end
-        mrec = np.concatenate(([0.], rec, [1.]))
-        mpre = np.concatenate(([0.], prec, [0.]))
+                boxes = candidate_boxes[i]
+            if boxes.shape[0] == 0:
+                continue
+            if limit is not None and boxes.shape[0] > limit:
+                boxes = boxes[:limit, :]
 
-        # compute the precision envelope
-        for i in range(mpre.size - 1, 0, -1):
-            mpre[i - 1] = np.maximum(mpre[i - 1], mpre[i])
+            overlaps = bbox_overlaps(boxes.astype(np.float),
+                                     gt_boxes.astype(np.float))
 
-        # to calculate area under PR curve, look for points
-        # where X axis (recall) changes value
-        i = np.where(mrec[1:] != mrec[:-1])[0]
+            _gt_overlaps = np.zeros((gt_boxes.shape[0]))
+            for j in xrange(gt_boxes.shape[0]):
+                # find which proposal box maximally covers each gt box
+                argmax_overlaps = overlaps.argmax(axis=0)
+                # and get the iou amount of coverage for each gt box
+                max_overlaps = overlaps.max(axis=0)
+                # find which gt box is 'best' covered (i.e. 'best' = most iou)
+                gt_ind = max_overlaps.argmax()
+                gt_ovr = max_overlaps.max()
+                assert(gt_ovr >= 0)
+                # find the proposal box that covers the best covered gt box
+                box_ind = argmax_overlaps[gt_ind]
+                # record the iou coverage of this gt box
+                _gt_overlaps[j] = overlaps[box_ind, gt_ind]
+                assert(_gt_overlaps[j] == gt_ovr)
+                # mark the proposal box and the gt box as used
+                overlaps[box_ind, :] = -1
+                overlaps[:, gt_ind] = -1
+            # append recorded iou coverage level
+            gt_overlaps = np.hstack((gt_overlaps, _gt_overlaps))
 
-        # and sum (\Delta recall) * prec
-        ap = np.sum((mrec[i + 1] - mrec[i]) * mpre[i + 1])
-    return ap
+        gt_overlaps = np.sort(gt_overlaps)
+        if thresholds is None:
+            step = 0.05
+            thresholds = np.arange(0.5, 0.95 + 1e-5, step)
+        recalls = np.zeros_like(thresholds)
+        # compute recall for each iou threshold
+        for i, t in enumerate(thresholds):
+            recalls[i] = (gt_overlaps >= t).sum() / float(num_pos)
+        # ar = 2 * np.trapz(recalls, thresholds)
+        ar = recalls.mean()
+        return {'ar': ar, 'recalls': recalls, 'thresholds': thresholds,
+                'gt_overlaps': gt_overlaps}
 
-def voc_eval(detpath,
-             annopath,
-             imagesetfile,
-             classname,
-             cachedir,
-             ovthresh=0.5,
-             use_07_metric=False):
-    """rec, prec, ap = voc_eval(detpath,
-                                annopath,
-                                imagesetfile,
-                                classname,
-                                [ovthresh],
-                                [use_07_metric])
+    def create_roidb_from_box_list(self, box_list, gt_roidb):
+        assert len(box_list) == self.num_images, \
+                'Number of boxes must match number of ground-truth images'
+        roidb = []
+        for i in xrange(self.num_images):
+            boxes = box_list[i]
+            num_boxes = boxes.shape[0]
+            overlaps = np.zeros((num_boxes, self.num_classes), dtype=np.float32)
 
-    Top level function that does the PASCAL VOC evaluation.
+            if gt_roidb is not None and gt_roidb[i]['boxes'].size > 0:
+                gt_boxes = gt_roidb[i]['boxes']
+                gt_classes = gt_roidb[i]['gt_classes']
+                gt_overlaps = bbox_overlaps(boxes.astype(np.float),
+                                            gt_boxes.astype(np.float))
+                argmaxes = gt_overlaps.argmax(axis=1)
+                maxes = gt_overlaps.max(axis=1)
+                I = np.where(maxes > 0)[0]
+                overlaps[I, gt_classes[argmaxes[I]]] = maxes[I]
 
-    detpath: Path to detections
-        detpath.format(classname) should produce the detection results file.
-    annopath: Path to annotations
-        annopath.format(imagename) should be the xml annotations file.
-    imagesetfile: Text file containing the list of images, one image per line.
-    classname: Category name (duh)
-    cachedir: Directory for caching the annotations
-    [ovthresh]: Overlap threshold (default = 0.5)
-    [use_07_metric]: Whether to use VOC07's 11 point AP computation
-        (default False)
-    """
-    # assumes detections are in detpath.format(classname)
-    # assumes annotations are in annopath.format(imagename)
-    # assumes imagesetfile is a text file with each line an image name
-    # cachedir caches the annotations in a pickle file
+            overlaps = scipy.sparse.csr_matrix(overlaps)
+            roidb.append({
+                'boxes' : boxes,
+                'gt_classes' : np.zeros((num_boxes,), dtype=np.int32),
+                'gt_overlaps' : overlaps,
+                'flipped' : False,
+                'seg_areas' : np.zeros((num_boxes,), dtype=np.float32),
+            })
+        return roidb
 
-    # first load gt
-    if not os.path.isdir(cachedir):
-        os.mkdir(cachedir)
-    cachefile = os.path.join(cachedir, 'annots.pkl')
-    # read list of images
-    with open(imagesetfile, 'r') as f:
-        lines = f.readlines()
-    imagenames = [x.strip() for x in lines]
+    @staticmethod
+    def merge_roidbs(a, b):
+        assert len(a) == len(b)
+        for i in xrange(len(a)):
+            a[i]['boxes'] = np.vstack((a[i]['boxes'], b[i]['boxes']))
+            a[i]['gt_classes'] = np.hstack((a[i]['gt_classes'],
+                                            b[i]['gt_classes']))
+            a[i]['gt_overlaps'] = scipy.sparse.vstack([a[i]['gt_overlaps'],
+                                                       b[i]['gt_overlaps']])
+            a[i]['seg_areas'] = np.hstack((a[i]['seg_areas'],
+                                           b[i]['seg_areas']))
+        return a
 
-    if not os.path.isfile(cachefile):
-        # load annots
-        recs = {}
-        for i, imagename in enumerate(imagenames):
-            recs[imagename] = parse_rec(annopath.format(imagename))
-            if i % 100 == 0:
-                print 'Reading annotation for {:d}/{:d}'.format(
-                    i + 1, len(imagenames))
-        # save
-        print 'Saving cached annotations to {:s}'.format(cachefile)
-        with open(cachefile, 'w') as f:
-            cPickle.dump(recs, f)
-    else:
-        # load
-        with open(cachefile, 'r') as f:
-            recs = cPickle.load(f)
-
-    # extract gt objects for this class
-    class_recs = {}
-    npos = 0
-    for imagename in imagenames:
-        R = [obj for obj in recs[imagename] if obj['name'] == classname]
-        bbox = np.array([x['bbox'] for x in R])
-        difficult = np.array([x['difficult'] for x in R]).astype(np.bool)
-        det = [False] * len(R)
-        npos = npos + sum(~difficult)
-        class_recs[imagename] = {'bbox': bbox,
-                                 'difficult': difficult,
-                                 'det': det}
-
-    # read dets
-    detfile = detpath.format(classname)
-    with open(detfile, 'r') as f:
-        lines = f.readlines()
-
-    splitlines = [x.strip().split(' ') for x in lines]
-    image_ids = [x[0] for x in splitlines]
-    confidence = np.array([float(x[1]) for x in splitlines])
-    BB = np.array([[float(z) for z in x[2:]] for x in splitlines])
-
-    # sort by confidence
-    sorted_ind = np.argsort(-confidence)
-    sorted_scores = np.sort(-confidence)
-    BB = BB[sorted_ind, :]
-    image_ids = [image_ids[x] for x in sorted_ind]
-
-    # go down dets and mark TPs and FPs
-    nd = len(image_ids)
-    tp = np.zeros(nd)
-    fp = np.zeros(nd)
-    for d in range(nd):
-        R = class_recs[image_ids[d]]
-        bb = BB[d, :].astype(float)
-        ovmax = -np.inf
-        BBGT = R['bbox'].astype(float)
-
-        if BBGT.size > 0:
-            # compute overlaps
-            # intersection
-            ixmin = np.maximum(BBGT[:, 0], bb[0])
-            iymin = np.maximum(BBGT[:, 1], bb[1])
-            ixmax = np.minimum(BBGT[:, 2], bb[2])
-            iymax = np.minimum(BBGT[:, 3], bb[3])
-            iw = np.maximum(ixmax - ixmin + 1., 0.)
-            ih = np.maximum(iymax - iymin + 1., 0.)
-            inters = iw * ih
-
-            # union
-            uni = ((bb[2] - bb[0] + 1.) * (bb[3] - bb[1] + 1.) +
-                   (BBGT[:, 2] - BBGT[:, 0] + 1.) *
-                   (BBGT[:, 3] - BBGT[:, 1] + 1.) - inters)
-
-            overlaps = inters / uni
-            ovmax = np.max(overlaps)
-            jmax = np.argmax(overlaps)
-
-        if ovmax > ovthresh:
-            if not R['difficult'][jmax]:
-                if not R['det'][jmax]:
-                    tp[d] = 1.
-                    R['det'][jmax] = 1
-                else:
-                    fp[d] = 1.
-        else:
-            fp[d] = 1.
-
-    # compute precision recall
-    fp = np.cumsum(fp)
-    tp = np.cumsum(tp)
-    rec = tp / float(npos)
-    # avoid divide by zero in case the first detection matches a difficult
-    # ground truth
-    prec = tp / np.maximum(tp + fp, np.finfo(np.float64).eps)
-    ap = voc_ap(rec, prec, use_07_metric)
-
-    return rec, prec, ap
+    def competition_mode(self, on):
+        """Turn competition mode on or off."""
+pass

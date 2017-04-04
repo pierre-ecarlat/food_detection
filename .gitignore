@@ -66,12 +66,13 @@
 ## Faster RCNN framework
 ####################################################
 /py-faster-rcnn/output
-/py-faster-rcnn/data/**
-!/py-faster-rcnn/data/.gitkeep
+/py-faster-rcnn/data/*
 !/py-faster-rcnn/data/README.md
 !/py-faster-rcnn/data/pylintrc
 !/py-faster-rcnn/data/demo/
+!/py-faster-rcnn/data/demo/**
 !/py-faster-rcnn/data/scripts/
+!/py-faster-rcnn/data/scripts/**
 
 
 ####################################################

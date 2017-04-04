@@ -13,6 +13,7 @@ from datasets.imagenet import imagenet
 from datasets.pascal_voc import pascal_voc
 from datasets.coco import coco
 from datasets.uecfood256 import uecfood256
+from datasets.foodinc import foodinc
 import numpy as np
 
 # Set up imagenet
@@ -45,6 +46,12 @@ for year in ['2014']:
     for split in ['train', 'val', 'test', 'try_train', 'try_val', 'try_test', 'try_val_mini']:
         name = 'uecfood256_{}_{}'.format(year, split)
         __sets[name] = (lambda split=split, year=year: uecfood256(split, year))
+
+# Set up Foodinc
+for year in ['2017']:
+    for split in ['train', 'val', 'trainval', 'test']:
+        name = 'foodinc_{}_{}'.format(year, split)
+        __sets[name] = (lambda split=split, year=year: foodinc(split, year))
 
 def get_imdb(name):
     """Get an imdb (image database) by name."""

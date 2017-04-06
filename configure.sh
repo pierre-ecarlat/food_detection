@@ -5,7 +5,7 @@
 ROOT="$EUID"
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 NB_GPU="$(lshw -C display | grep "NVIDIA" | wc -l)"
-CUDNN=false
+CUDNN=$($NB_GPU -gt 0)
 
 
 ##############################################
@@ -155,3 +155,4 @@ pip install easydict
 pip install numpy --upgrade
 apt-get install python-skimage
 apt-get install python-protobuf
+

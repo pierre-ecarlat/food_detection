@@ -15,6 +15,7 @@ from datasets.coco import coco
 from datasets.uecfood256 import uecfood256
 from datasets.foodinc import foodinc
 from datasets.foodinc_sample import foodinc_sample
+from datasets.foodinc_reduced import foodinc_reduced
 import numpy as np
 
 # Set up imagenet
@@ -59,6 +60,12 @@ for year in ['2017']:
     for split in ['train', 'val', 'trainval', 'test']:
         name = 'foodinc_sample_{}_{}'.format(year, split)
         __sets[name] = (lambda split=split, year=year: foodinc_sample(split, year))
+
+# Set up Foodinc reduced (18 categories)
+for year in ['2017']:
+    for split in ['train', 'val', 'trainval', 'test']:
+        name = 'foodinc_reduced_{}_{}'.format(year, split)
+        __sets[name] = (lambda split=split, year=year: foodinc_reduced(split, year))
 
 def get_imdb(name):
     """Get an imdb (image database) by name."""

@@ -53,6 +53,12 @@ for year in ['2017']:
         name = 'foodinc_{}_{}'.format(year, split)
         __sets[name] = (lambda split=split, year=year: foodinc(split, year))
 
+# Set up Foodinc sample
+for year in ['2017']:
+    for split in ['train', 'val', 'trainval', 'test']:
+        name = 'foodinc_sample_{}_{}'.format(year, split)
+        __sets[name] = (lambda split=split, year=year: foodinc_sample(split, year))
+
 def get_imdb(name):
     """Get an imdb (image database) by name."""
     if not __sets.has_key(name):

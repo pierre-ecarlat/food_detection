@@ -32,24 +32,10 @@ class foodinc_reduced(imdb):
                             else devkit_path
         self._data_path = self._devkit_path
         self._classes = ('__background__', # always index 0
-                         'white rice','brown rice','other rice',
-                         'bread','cooked bread','sweet bread','sandwich','other bread',
-                         'ramen','udon','soba','other noodles',
-                         'white fish','blue fish','shellfish','crutacean','other fish',
-                         'steak','beef','pork','chicken','ham - baccon','other meat',
-                         'tofu','soymilk','natto','beans','other soyfoods',
-                         'eggs','egg dish',
-                         'fruits',
-                         'tomato','broccoli','root crops','green and yellow vegetables','mushrooms','other vegetables',
-                         'milk','yogurt','cheese','other dairy products',
-                         'nuts & seeds',
-                         'water','juice','vegetable juice','coffe - tea','alcohol','other drinks',
-                         'stir-fried food','fried food','steamed food','grilled food','simmered food',
-                         'green salad','seaweed salad','potato - pumpkins salad','proteinized salad','vinegared salad',
-                         'soup stock',
-                         'pastry','japanese pastry',
-                         'curry','rice ball - seaweed roll','porridge','other rice dishes',
-                         'pot','bento')
+                         'rice', 'bread', 'noodles', 'fish', 'meat',
+                         'soyfoods', 'eggs', 'fruits', 'vegetables', 'dairy products',
+                         'nuts & seeds', 'beverages', 'recipes', 'salads', 'soup stock',
+                         'pastries', 'rice dishes', 'others')
 
         self._class_to_ind = dict(zip(self.classes, xrange(self.num_classes)))
         self._image_ext = '.png'
@@ -323,16 +309,7 @@ class foodinc_reduced(imdb):
         print '-----------------------------------------------------'
         print 'Computing results with the official MATLAB eval code.'
         print '-----------------------------------------------------'
-        path = os.path.join(cfg.ROOT_DIR, 'lib', 'datasets',
-                            'VOCdevkit-matlab-wrapper')
-        cmd = 'cd {} && '.format(path)
-        cmd += '{:s} -nodisplay -nodesktop '.format(cfg.MATLAB)
-        cmd += '-r "dbstop if error; '
-        cmd += 'voc_eval(\'{:s}\',\'{:s}\',\'{:s}\',\'{:s}\'); quit;"' \
-               .format(self._devkit_path, self._get_comp_id(),
-                       self._image_set, output_dir)
-        print('Running:\n{}'.format(cmd))
-        status = subprocess.call(cmd, shell=True)
+        print 'Not implemented...'
 
     def evaluate_detections(self, all_boxes, output_dir):
         self._write_foodinc_reduced_results_file(all_boxes)

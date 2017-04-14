@@ -14,6 +14,7 @@ from datasets.pascal_voc import pascal_voc
 from datasets.coco import coco
 from datasets.uecfood256 import uecfood256
 from datasets.foodinc import foodinc
+from datasets.foodinc_sample import foodinc_sample
 import numpy as np
 
 # Set up imagenet

@@ -240,7 +240,7 @@ def foodinc_eval(detpath,
     # print('prec')
     # print(prec)
 
-    ap = foddinc_ap(rec, prec)
+    ap = foodinc_ap(rec, prec)
 
     return rec, prec, ap
 

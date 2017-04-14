@@ -43,6 +43,7 @@ case $DATASET in
     TEST_IMDB="foodinc_2017_test"
     PT_DIR="foodinc"
     ITERS=70000
+    # ITERS=100
     ;;
   *)
     echo "No dataset given"
@@ -56,7 +57,7 @@ echo Logging output to "$LOG"
 
 time ./tools/train_net.py --gpu ${GPU_ID} \
   --solver models/${PT_DIR}/${NET}/faster_rcnn_end2end/solver.prototxt \
-  --weights data/imagenet_models/${NET}.v2.caffemodel \
+  --weights /mnt2/givenModels/imagenet/${NET}.caffemodel \
   --imdb ${TRAIN_IMDB} \
   --iters ${ITERS} \
   --cfg experiments/cfgs/faster_rcnn_end2end.yml \

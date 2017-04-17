@@ -240,7 +240,7 @@ def foodinc_sample_eval(detpath,
     # print('prec')
     # print(prec)
 
-    ap = foddinc_ap(rec, prec)
+    ap = foodinc_sample_ap(rec, prec)
 
     return rec, prec, ap
 

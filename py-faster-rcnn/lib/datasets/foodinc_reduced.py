@@ -241,7 +241,7 @@ class foodinc_reduced(imdb):
         # VOCdevkit/results/VOC2007/Main/<comp_id>_det_test_aeroplane.txt
         filename = self._get_comp_id() + '_det_' + self._image_set + '_{:07d}.txt'
         path = os.path.join(
-            self._devkit_path,
+            self.DATA_DIR,
             'results',
             'Foodinc_reduced_' + self._year,
             filename)

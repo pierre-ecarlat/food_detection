@@ -53,11 +53,11 @@ for year in ['2014']:
 for year in ['2017']:
     for split in ['train', 'val', 'trainval', 'test']:
         # Basic ; sample and reduced (18 categories)
-        name = 'foodinc_{}_{}'.format(db, year, split)
+        name = 'foodinc_{}_{}'.format(year, split)
         __sets[name] = (lambda split=split, year=year: foodinc(split, year))
-        name = 'foodinc_sample_{}_{}'.format(db, year, split)
+        name = 'foodinc_sample_{}_{}'.format(year, split)
         __sets[name] = (lambda split=split, year=year: foodinc_sample(split, year))
-        name = 'foodinc_reduced_{}_{}'.format(db, year, split)
+        name = 'foodinc_reduced_{}_{}'.format(year, split)
         __sets[name] = (lambda split=split, year=year: foodinc_reduced(split, year))
 
 def get_imdb(name):

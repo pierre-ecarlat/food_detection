@@ -62,7 +62,8 @@ class foodinc_sample(imdb):
         # Specific config options
         self.config = {'cleanup'     : True,
                        'use_salt'    : True,
-                       'top_k'       : 2000}
+                       'top_k'       : 2000,
+                       'matlab_eval' : False}
 
         assert os.path.exists(self._devkit_path), \
                 'Foodinc_sample devkit path does not exist: {}'.format(self._devkit_path)

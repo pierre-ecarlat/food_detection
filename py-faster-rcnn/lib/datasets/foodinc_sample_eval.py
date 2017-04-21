@@ -128,7 +128,7 @@ def foodinc_sample_eval(detpath,
         # load
         with open(cachefile, 'r') as f:
             recs = cPickle.load(f)
-
+    
     # extract gt objects for this class
     class_recs = {}
     npos = 0

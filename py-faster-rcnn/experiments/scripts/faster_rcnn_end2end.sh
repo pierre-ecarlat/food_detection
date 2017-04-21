@@ -43,7 +43,8 @@ case $DATASET in
     TRAIN_IMDB="foodinc_2017_trainval"
     TEST_IMDB="foodinc_2017_test"
     PT_DIR="foodinc"
-    ITERS=70000
+    # ITERS=70000
+    ITERS=20000
     # ITERS=100
     ;;
   foodinc_sample)

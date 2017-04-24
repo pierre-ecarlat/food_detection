@@ -171,7 +171,8 @@ def foodinc_reduced_eval(detpath,
     # print('sorted_scores')
     # print(sorted_scores)
 
-    BB = BB[sorted_ind, :]
+    if len(BB) > 0:
+        BB = BB[sorted_ind, :]
     image_ids = [image_ids[x] for x in sorted_ind]
 
     # go down dets and mark TPs and FPs

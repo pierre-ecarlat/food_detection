@@ -256,7 +256,7 @@ class foodinc_sample(imdb):
         # VOCdevkit/results/VOC2007/Main/<comp_id>_det_test_aeroplane.txt
         filename = self._get_comp_id() + '_det_' + self._image_set + '_{:07d}.txt'
         path = os.path.join(
-            cfg.DATA_DIR,
+            cfg._devkit_path,
             'results',
             'Foodinc_sample_' + self._year,
             filename)
@@ -274,9 +274,10 @@ class foodinc_sample(imdb):
                     if dets == []:
                         continue
                     for k in xrange(dets.shape[0]):
-                        ann = '{:s} {:.3f} {:.1f} {:.1f} {:.1f} {:.1f}\n'.format(index, dets[k, -1], dets[k, 0], dets[k, 1], dets[k, 2], dets[k, 3])
-                        print ann
-                        f.write(ann)
+                        f.write('{:s} {:.3f} {:.1f} {:.1f} {:.1f} {:.1f}\n'.
+                                format(index, dets[k, -1],
+                                       dets[k, 0], dets[k, 1],
+                                       dets[k, 2], dets[k, 3]))
 
     def _do_python_eval(self, output_dir = 'output'):
         annopath = os.path.join(

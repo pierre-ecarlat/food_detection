@@ -268,7 +268,7 @@ class foodinc_sample(imdb):
                 continue
             filename = self._get_foodinc_sample_results_file_template().format(cls_ind)
             print 'Writing {} Foodinc results file, ID: {} in {}'.format(cls, cls_ind, filename)
-            f = open(filename, 'x')
+            f = open(filename, 'w')
             for im_ind, index in enumerate(self.image_index):
                 dets = all_boxes[cls_ind][im_ind]
                 if dets == []:

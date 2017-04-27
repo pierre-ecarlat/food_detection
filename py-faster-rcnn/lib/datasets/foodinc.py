@@ -266,7 +266,7 @@ class foodinc(imdb):
         for cls_ind, cls in enumerate(self.classes):
             if cls == '__background__':
                 continue
-            print 'Writing {} Foodinc results file, ID: {}'.format(cls, cls_ind)
+            print 'Writing {} Foodinc results file, ID: {} in {}'.format(cls, cls_ind, filename)
             filename = self._get_foodinc_results_file_template().format(cls_ind)
             with open(filename, 'wt') as f:
                 for im_ind, index in enumerate(self.image_index):
@@ -274,6 +274,7 @@ class foodinc(imdb):
                     if dets == []:
                         continue
                     for k in xrange(dets.shape[0]):
+                        print 'here'
                         f.write('{:s} {:.3f} {:.1f} {:.1f} {:.1f} {:.1f}\n'.
                                 format(index, dets[k, -1],
                                        dets[k, 0], dets[k, 1],

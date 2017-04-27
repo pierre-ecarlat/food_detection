@@ -274,7 +274,10 @@ class foodinc_sample(imdb):
                     if dets == []:
                         continue
                     for k in xrange(dets.shape[0]):
-                        print 'here'
+                        print 'here: {:s} {:.3f} {:.1f} {:.1f} {:.1f} {:.1f}\n'.
+                                format(index, dets[k, -1],
+                                       dets[k, 0], dets[k, 1],
+                                       dets[k, 2], dets[k, 3])
                         f.write('{:s} {:.3f} {:.1f} {:.1f} {:.1f} {:.1f}\n'.
                                 format(index, dets[k, -1],
                                        dets[k, 0], dets[k, 1],

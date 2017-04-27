@@ -266,9 +266,10 @@ class foodinc_sample(imdb):
         for cls_ind, cls in enumerate(self.classes):
             if cls == '__background__':
                 continue
-            filename = self._get_foodinc_sample_results_file_template().format(cls_ind)
+            #filename = self._get_foodinc_sample_results_file_template().format(cls_ind)
+            filename = "tmpDir/" + str(cls_ind) + ".txt"
             print 'Writing {} Foodinc results file, ID: {} in {}'.format(cls, cls_ind, filename)
-            with open(filename, 'a') as f:
+            with open(filename, 'wt') as f:
                 for im_ind, index in enumerate(self.image_index):
                     dets = all_boxes[cls_ind][im_ind]
                     if dets == []:

@@ -268,17 +268,20 @@ class foodinc_sample(imdb):
                 continue
             filename = self._get_foodinc_sample_results_file_template().format(cls_ind)
             print 'Writing {} Foodinc results file, ID: {} in {}'.format(cls, cls_ind, filename)
-            f = open(filename, 'w')
-            for im_ind, index in enumerate(self.image_index):
-                dets = all_boxes[cls_ind][im_ind]
-                if dets == []:
-                    continue
-                for k in xrange(dets.shape[0]):
-                    f.write('{:s} {:.3f} {:.1f} {:.1f} {:.1f} {:.1f}\n'.
-                            format(index, dets[k, -1],
-                                   dets[k, 0], dets[k, 1],
-                                   dets[k, 2], dets[k, 3]))
-            f.close()
+            with open(filename, 'wt') as f:
+                for im_ind, index in enumerate(self.image_index):
+                    dets = all_boxes[cls_ind][im_ind]
+                    if dets == []:
+                        continue
+                    for k in xrange(dets.shape[0]):
+                        try:
+                            f.write('{:s} {:.3f} {:.1f} {:.1f} {:.1f} {:.1f}\n'.
+                                    format(index, dets[k, -1],
+                                           dets[k, 0], dets[k, 1],
+                                           dets[k, 2], dets[k, 3]))
+                        except Exception as e:
+                            print type(e)
+                            print str(e)
 
     def _do_python_eval(self, output_dir = 'output'):
         annopath = os.path.join(

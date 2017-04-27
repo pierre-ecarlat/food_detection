@@ -279,6 +279,10 @@ class foodinc_sample(imdb):
                                     format(index, dets[k, -1],
                                            dets[k, 0], dets[k, 1],
                                            dets[k, 2], dets[k, 3]))
+                            print ('{:s} {:.3f} {:.1f} {:.1f} {:.1f} {:.1f}'.
+                                    format(index, dets[k, -1],
+                                           dets[k, 0], dets[k, 1],
+                                           dets[k, 2], dets[k, 3]))
                             print str(os.path.exists(filename)) + " " + str(os.stat(filename).st_size)
                         except Exception as e:
                             print type(e)

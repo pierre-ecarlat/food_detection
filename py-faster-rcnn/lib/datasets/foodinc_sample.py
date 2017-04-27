@@ -266,8 +266,7 @@ class foodinc_sample(imdb):
         for cls_ind, cls in enumerate(self.classes):
             if cls == '__background__':
                 continue
-            #filename = self._get_foodinc_sample_results_file_template().format(cls_ind)
-            filename = "tmpDir/" + str(cls_ind) + ".txt"
+            filename = self._get_foodinc_sample_results_file_template().format(cls_ind)
             print 'Writing {} Foodinc results file, ID: {} in {}'.format(cls, cls_ind, filename)
             with open(filename, 'wt') as f:
                 for im_ind, index in enumerate(self.image_index):
@@ -346,7 +345,7 @@ class foodinc_sample(imdb):
                 if cls == '__background__':
                     continue
                 filename = self._get_foodinc_sample_results_file_template().format(i)
-                os.remove(filename)
+                #os.remove(filename)
 
     def competition_mode(self, on):
         if on:

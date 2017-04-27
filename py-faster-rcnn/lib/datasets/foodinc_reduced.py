@@ -46,7 +46,7 @@ class foodinc_reduced(imdb):
         self._comp_id = 'comp4'
 
         # Specific config options
-        self.config = {'cleanup'     : True,
+        self.config = {'cleanup'     : False,
                        'use_salt'    : True,
                        'top_k'       : 2000,
                        'matlab_eval' : False}

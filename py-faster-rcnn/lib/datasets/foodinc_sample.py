@@ -60,7 +60,7 @@ class foodinc_sample(imdb):
         self._comp_id = 'comp4'
 
         # Specific config options
-        self.config = {'cleanup'     : True,
+        self.config = {'cleanup'     : False,
                        'use_salt'    : True,
                        'top_k'       : 2000,
                        'matlab_eval' : False}
@@ -266,27 +266,18 @@ class foodinc_sample(imdb):
         for cls_ind, cls in enumerate(self.classes):
             if cls == '__background__':
                 continue
+            print 'Writing {} Foodinc results file, ID: {}'.format(cls, cls_ind)
             filename = self._get_foodinc_sample_results_file_template().format(cls_ind)
-            print 'Writing {} Foodinc results file, ID: {} in {}'.format(cls, cls_ind, filename)
             with open(filename, 'wt') as f:
                 for im_ind, index in enumerate(self.image_index):
                     dets = all_boxes[cls_ind][im_ind]
                     if dets == []:
                         continue
                     for k in xrange(dets.shape[0]):
-                        try:
-                            f.write('{:s} {:.3f} {:.1f} {:.1f} {:.1f} {:.1f}\n'.
-                                    format(index, dets[k, -1],
-                                           dets[k, 0], dets[k, 1],
-                                           dets[k, 2], dets[k, 3]))
-                            print ('{:s} {:.3f} {:.1f} {:.1f} {:.1f} {:.1f}'.
-                                    format(index, dets[k, -1],
-                                           dets[k, 0], dets[k, 1],
-                                           dets[k, 2], dets[k, 3]))
-                            print str(os.path.exists(filename)) + " " + str(os.stat(filename).st_size)
-                        except Exception as e:
-                            print type(e)
-                            print str(e)
+                        f.write('{:s} {:.3f} {:.1f} {:.1f} {:.1f} {:.1f}\n'.
+                                format(index, dets[k, -1],
+                                       dets[k, 0], dets[k, 1],
+                                       dets[k, 2], dets[k, 3]))
 
     def _do_python_eval(self, output_dir = 'output'):
         annopath = os.path.join(
@@ -345,7 +336,7 @@ class foodinc_sample(imdb):
                 if cls == '__background__':
                     continue
                 filename = self._get_foodinc_sample_results_file_template().format(i)
-                #os.remove(filename)
+                os.remove(filename)
 
     def competition_mode(self, on):
         if on:

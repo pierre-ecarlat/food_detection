@@ -65,7 +65,7 @@
 
 
 ####################################################
-## Faster RCNN framework
+## Py Faster RCNN framework
 ####################################################
 /py-faster-rcnn/output
 /py-faster-rcnn/data/*
@@ -126,3 +126,16 @@
 #/py-faster-rcnn/caffe-fast-rcnn/LOG*
 #/py-faster-rcnn/caffe-fast-rcnn/CURRENT
 #/py-faster-rcnn/caffe-fast-rcnn/MANIFEST-*
+
+
+####################################################
+## TF Faster RCNN framework
+####################################################
+/tf-faster-rcnn/output
+/tf-faster-rcnn/data/*
+!/tf-faster-rcnn/data/README.md
+!/tf-faster-rcnn/data/pylintrc
+!/tf-faster-rcnn/data/demo/
+!/tf-faster-rcnn/data/demo/**
+!/tf-faster-rcnn/data/scripts/
+!/tf-faster-rcnn/data/scripts/**

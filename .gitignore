@@ -139,3 +139,5 @@
 !/tf-faster-rcnn/data/demo/**
 !/tf-faster-rcnn/data/scripts/
 !/tf-faster-rcnn/data/scripts/**
+!/tf-faster-rcnn/tensorboard/
+!/tf-faster-rcnn/tensorboard/**

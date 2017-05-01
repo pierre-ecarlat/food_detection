@@ -133,11 +133,10 @@
 ####################################################
 /tf-faster-rcnn/output
 /tf-faster-rcnn/data/*
+/tf-faster-rcnn/tensorboard
 !/tf-faster-rcnn/data/README.md
 !/tf-faster-rcnn/data/pylintrc
 !/tf-faster-rcnn/data/demo/
 !/tf-faster-rcnn/data/demo/**
 !/tf-faster-rcnn/data/scripts/
 !/tf-faster-rcnn/data/scripts/**
-!/tf-faster-rcnn/tensorboard/
-!/tf-faster-rcnn/tensorboard/**

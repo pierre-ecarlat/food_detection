@@ -290,10 +290,10 @@ class foodinc(imdb):
     if self.config['matlab_eval']:
       self._do_matlab_eval(output_dir)
     if self.config['cleanup']:
-      for cls in self._classes:
+      for i, cls in self._classes:
         if cls == '__background__':
           continue
-        filename = self._get_foodinc_results_file_template().format(cls)
+        filename = self._get_foodinc_results_file_template().format(i)
         os.remove(filename)
 
   def competition_mode(self, on):

@@ -11,6 +11,7 @@ import xml.etree.ElementTree as ET
 import os
 import pickle
 import numpy as np
+import re
 
 def parse_rec(filename):
     """ Parse a Foodinc txt file """

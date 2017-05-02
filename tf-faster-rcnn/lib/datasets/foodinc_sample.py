@@ -293,7 +293,7 @@ class foodinc_sample(imdb):
       for i, cls in enumerate(self._classes):
         if cls == '__background__':
           continue
-        filename = self._get_foodinc_results_file_template().format(i)
+        filename = self._get_foodinc_sample_results_file_template().format(i)
         os.remove(filename)
 
   def competition_mode(self, on):

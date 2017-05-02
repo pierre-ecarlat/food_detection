@@ -19,7 +19,7 @@ import utils.cython_bbox
 import pickle
 import subprocess
 import uuid
-from foodinc_sample_eval import foodinc_sample_eval
+from .foodinc_sample_eval import foodinc_sample_eval
 from model.config import cfg
 
 

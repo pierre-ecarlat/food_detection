@@ -162,67 +162,68 @@ def foodinc_sample_eval(detpath,
     # print('BB')
     # print(BB)
 
-    # sort by confidence
-    sorted_ind = np.argsort(-confidence)
-    sorted_scores = np.sort(-confidence)
+    if BB.shape[0] > 0:
+        # sort by confidence
+        sorted_ind = np.argsort(-confidence)
+        sorted_scores = np.sort(-confidence)
 
-    # print('sorted_ind')
-    # print(sorted_ind)
-    # print('sorted_scores')
-    # print(sorted_scores)
+        # print('sorted_ind')
+        # print(sorted_ind)
+        # print('sorted_scores')
+        # print(sorted_scores)
 
-    if len(BB) > 0:
-        BB = BB[sorted_ind, :]
-    image_ids = [image_ids[x] for x in sorted_ind]
+        if len(BB) > 0:
+            BB = BB[sorted_ind, :]
+        image_ids = [image_ids[x] for x in sorted_ind]
 
-    # go down dets and mark TPs and FPs
-    nd = len(image_ids)
-    tp = np.zeros(nd)
-    fp = np.zeros(nd)
-    for d in range(nd):
-        R = class_recs[image_ids[d]]
-        bb = BB[d, :].astype(float)
-        ovmax = -np.inf
-        BBGT = R['bbox'].astype(float)
+        # go down dets and mark TPs and FPs
+        nd = len(image_ids)
+        tp = np.zeros(nd)
+        fp = np.zeros(nd)
+        for d in range(nd):
+            R = class_recs[image_ids[d]]
+            bb = BB[d, :].astype(float)
+            ovmax = -np.inf
+            BBGT = R['bbox'].astype(float)
 
-#        print('R')
-#        print(R)
-#        print('bb')
-#        print(bb)
-#        print('BBGT')
-#        print(BBGT)
+    #        print('R')
+    #        print(R)
+    #        print('bb')
+    #        print(bb)
+    #        print('BBGT')
+    #        print(BBGT)
 
-        if BBGT.size > 0:
-            # compute overlaps
-            # intersection
-            ixmin = np.maximum(BBGT[:, 0], bb[0])
-            iymin = np.maximum(BBGT[:, 1], bb[1])
-            ixmax = np.minimum(BBGT[:, 2], bb[2])
-            iymax = np.minimum(BBGT[:, 3], bb[3])
-            iw = np.maximum(ixmax - ixmin + 1., 0.)
-            ih = np.maximum(iymax - iymin + 1., 0.)
-            inters = iw * ih
+            if BBGT.size > 0:
+                # compute overlaps
+                # intersection
+                ixmin = np.maximum(BBGT[:, 0], bb[0])
+                iymin = np.maximum(BBGT[:, 1], bb[1])
+                ixmax = np.minimum(BBGT[:, 2], bb[2])
+                iymax = np.minimum(BBGT[:, 3], bb[3])
+                iw = np.maximum(ixmax - ixmin + 1., 0.)
+                ih = np.maximum(iymax - iymin + 1., 0.)
+                inters = iw * ih
 
-            # union
-            uni = ((bb[2] - bb[0] + 1.) * (bb[3] - bb[1] + 1.) +
-                   (BBGT[:, 2] - BBGT[:, 0] + 1.) *
-                   (BBGT[:, 3] - BBGT[:, 1] + 1.) - inters)
+                # union
+                uni = ((bb[2] - bb[0] + 1.) * (bb[3] - bb[1] + 1.) +
+                       (BBGT[:, 2] - BBGT[:, 0] + 1.) *
+                       (BBGT[:, 3] - BBGT[:, 1] + 1.) - inters)
 
-            overlaps = inters / uni
-            ovmax = np.max(overlaps)
-            jmax = np.argmax(overlaps)
+                overlaps = inters / uni
+                ovmax = np.max(overlaps)
+                jmax = np.argmax(overlaps)
 
-            # print('overlaps')
-            # print(overlaps)
+                # print('overlaps')
+                # print(overlaps)
 
-        if ovmax > ovthresh:
-            if not R['det'][jmax]:
-                tp[d] = 1.
-                R['det'][jmax] = 1
+            if ovmax > ovthresh:
+                if not R['det'][jmax]:
+                    tp[d] = 1.
+                    R['det'][jmax] = 1
+                else:
+                    fp[d] = 1.
             else:
                 fp[d] = 1.
-        else:
-            fp[d] = 1.
 
     # compute precision recall
     fp = np.cumsum(fp)

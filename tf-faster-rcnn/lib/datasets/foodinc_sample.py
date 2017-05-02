@@ -279,9 +279,16 @@ class foodinc_sample(imdb):
     print('--------------------------------------------------------------')
 
   def _do_matlab_eval(self, output_dir='output'):
+<<<<<<< HEAD
     print('--------------------------------------------------------------')
     print('Not implemented...')
     print('--------------------------------------------------------------')
+=======
+    print '-----------------------------------------------------'
+    print 'Computing results with the official MATLAB eval code.'
+    print '-----------------------------------------------------'
+    print 'Not implemented...'
+>>>>>>> dc3809ade5a785b71ed0cc3d9d1bacd529f10e88
 
   def evaluate_detections(self, all_boxes, output_dir):
     self._write_foodinc_sample_results_file(all_boxes)

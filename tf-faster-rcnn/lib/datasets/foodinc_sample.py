@@ -290,7 +290,7 @@ class foodinc_sample(imdb):
     if self.config['matlab_eval']:
       self._do_matlab_eval(output_dir)
     if self.config['cleanup']:
-      for i, cls in self._classes:
+      for i, cls in enumerate(self._classes):
         if cls == '__background__':
           continue
         filename = self._get_foodinc_results_file_template().format(i)

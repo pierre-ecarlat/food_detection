@@ -12,6 +12,7 @@ import os
 from datasets.imdb import imdb
 import datasets.ds_utils as ds_utils
 import xml.etree.ElementTree as ET
+import re
 import numpy as np
 import scipy.sparse
 import scipy.io as sio
